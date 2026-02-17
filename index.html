@@ -1,0 +1,97 @@
+7291"}
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
+body{
+    font-family: Arial;
+    background:#0a0a0a;
+    color:white;
+    text-align:center;
+    padding:15px;
+}
+h2{margin-bottom:10px;}
+input{
+    font-size:22px;
+    padding:12px;
+    width:160px;
+    text-align:center;
+    border-radius:10px;
+    border:none;
+}
+button{
+    font-size:20px;
+    padding:12px 18px;
+    margin:6px;
+    border-radius:10px;
+    border:none;
+    background:#ff6600;
+    color:white;
+}
+.flightBtn{
+    display:block;
+    width:100%;
+    font-size:22px;
+    margin:8px 0;
+}
+svg{
+    background:white;
+    padding:18px;
+    margin-top:18px;
+    width:100%;
+}
+</style>
+</head>
+<body>
+
+<h2>EasyJet Rampa — Nivel Absoluto</h2>
+
+<div>
+<input id="manual" placeholder="1234" maxlength="4" inputmode="numeric">
+<button onclick="manualGen()">Generar</button>
+</div>
+
+<div id="buttons"></div>
+
+<svg id="barcode"></svg>
+
+<script>
+
+let flights = [
+1234,2345,3456,4567,5678,
+6789,7890,8901,9012,1122,
+2233,3344,4455,5566,6677
+];
+
+function renderButtons(){
+    let c=document.getElementById("buttons");
+    flights.forEach(f=>{
+        let b=document.createElement("button");
+        b.className="flightBtn";
+        b.innerText="ESZ"+f+"-11";
+        b.onclick=()=>gen(f);
+        c.appendChild(b);
+    });
+}
+
+function gen(n){
+    JsBarcode("#barcode","ESZ"+n+"-11",{
+        format:"CODE128",
+        width:3,
+        height:140,
+        displayValue:true
+    });
+}
+
+function manualGen(){
+    let v=document.getElementById("manual").value;
+    if(v.length===4){gen(v)}
+}
+
+renderButtons();
+
+</script>
+</body>
+<
