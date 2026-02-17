@@ -1,4 +1,4 @@
-51922"}
+"91021"}
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>EasyJet Ramp</title>
 
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"62816"}
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
 
 <style>
 body{
@@ -18,12 +18,7 @@ body{
     text-align:center;
     padding:10px;
 }
-
-h2{
-    margin:6px;
-    font-size:22px;
-}
-
+h2{margin:6px;font-size:22px;}
 input{
     font-size:26px;
     padding:14px;
@@ -32,7 +27,6 @@ input{
     border-radius:12px;
     border:none;
 }
-
 button{
     font-size:26px;
     padding:18px;
@@ -43,46 +37,38 @@ button{
     color:white;
     width:100%;
 }
-
 svg{
     background:white;
     padding:12px;
     margin-top:12px;
     width:100%;
 }
-
 </style>
 </head>
+
 <body>
 
-<h2>EasyJet — Rampa Pro</h2>
+<h2>EasyJet — Rampa PRO OCR</h2>
 
 <input id="manual" placeholder="1234" maxlength="4" inputmode="numeric">
 <button onclick="manualGen()">GENERAR</button>
-    62814"}
+
 <input type="file" accept="image/*" capture="environment" id="imgInput">
-<button onclick="scanImage()">ESCANEAR FOTO LISTADO</
+<button onclick="scanImage()">ESCANEAR FOTO LISTADO</button>
 
 <div id="buttons"></div>
-
 <svg id="barcode"></svg>
 
 <script>
 
-let flights = JSON.parse(localStorage.getItem("flights")) || [
-3255,1481,1493,1517,1537,
-1547,1553,1561,1583,1686,
-1711,1720,1735,1752,1778
-];
+let flights = JSON.parse(localStorage.getItem("flights")) || [];
 
 function saveFlights(){
     localStorage.setItem("flights",JSON.stringify(flights));
 }
 
 function vibrate(){
-    if(navigator.vibrate){
-        navigator.vibrate(60);
-    }
+    if(navigator.vibrate) navigator.vibrate(60);
 }
 
 function gen(n){
@@ -92,20 +78,20 @@ function gen(n){
         height:150,
         displayValue:true
     });
-
     vibrate();
-
-    if(!flights.includes(parseInt(n))){
-        flights.unshift(parseInt(n));
-        flights = flights.slice(0,15);
-        saveFlights();
-        renderButtons();
-    }
 }
 
 function manualGen(){
     let v=document.getElementById("manual").value;
-    if(v.length===4){ gen(v); }
+    if(v.length===4){
+        if(!flights.includes(parseInt(v))){
+            flights.unshift(parseInt(v));
+            flights=flights.slice(0,15);
+            saveFlights();
+            renderButtons();
+        }
+        gen(v);
+    }
 }
 
 function renderButtons(){
@@ -119,31 +105,26 @@ function renderButtons(){
     });
 }
 
-renderButtons();
-    62815"}
 async function scanImage(){
-    const file = document.getElementById('imgInput').files[0];
+    const file=document.getElementById('imgInput').files[0];
     if(!file) return;
 
-    const img = new Image();
-    img.src = URL.createObjectURL(file);
+    const worker = await Tesseract.createWorker('eng');
+    const { data:{ text } } = await worker.recognize(file);
 
-    img.onload = async () => {
+    const matches=text.match(/\d{4}/g);
 
-        const worker = await Tesseract.createWorker('eng');
-        const { data: { text } } = await worker.recognize(img);
+    if(matches){
+        flights=[...new Set(matches.map(Number))];
+        saveFlights();
+        renderButtons();
+        vibrate();
+    }
 
-        const matches = text.match(/\d{4}/g);
+    await worker.terminate();
+}
 
-        if(matches){
-            flights = [...new Set(matches.map(Number))];
-            saveFlights();
-            renderButtons();
-            vibrate();
-        }
-
-        await worker.terminate();
-    
+renderButtons();
 
 </script>
 </body>
